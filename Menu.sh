@@ -16,24 +16,27 @@ openDir()
 		while [[ selectDir -ne 1 ]]; do
 			#If folder is not empty get user input and test if the directory exists.
 			if [[ "$(ls -d *)" ]]; then
+				echo ""
 				echo "Directory list:"
 				ls -d *
+				echo ""
 				dir=null
 				echo "Type the name of the directory to open."
 				read dir
+				echo ""
 				if test -d $dir; then
 					#Open directory and display contents as well as current directory location.
 					cd $dir
 					pwd
-					echo "File list:"
-					ls
+					echo ""
 					selectDir=1
 					projectMenu
 				else
 					echo "Directory not found. Try again."
+					echo ""
 				fi
 			else
-				echo "No directory found."
+				echo "No directories found to open."
 				echo ""
 				selectDir=1
 			fi
@@ -144,11 +147,11 @@ openFile()
 #Will append information to a log file when a text file is opened.
 logFileEdit()
 {
-	echo "Task: Open text file for possible edits." >> log.txt
-	echo "User: $USER" >> log.txt
-	echo "Time: $(date)" >> log.txt
-	echo "File: $1" >> log.txt
-	echo "Directory: $(pwd)" >> log.txt
+	echo "Task:			Open text file for possible edits." >> log.txt
+	echo "User:			$USER" >> log.txt
+	echo "Time:			$(date)" >> log.txt
+	echo "File:			$1" >> log.txt
+	echo "Directory:	$(pwd)" >> log.txt
 }
 
 #Will commit files
