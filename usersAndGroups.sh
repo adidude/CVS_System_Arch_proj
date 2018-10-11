@@ -9,7 +9,7 @@ createGroup()
 #Add Users to Group
 addToGroup()
 {
-    echo -n "Which group would you like to add to?"
+    echo -n "Which group would you like to add users to?"
     read groupName;
     if [ $(getent group $groupName) ]; then
         addUsers($groupName)
@@ -89,7 +89,7 @@ shareFile($path)
 }
 
 #View files shared with group
-viewFiles($groupName)
+viewFiles($groupName, $directoryName)
 {
     find $directoryLocation -group {$groupName}
 }
