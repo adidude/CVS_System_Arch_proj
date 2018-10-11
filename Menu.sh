@@ -8,7 +8,17 @@ else
 	cd ~/CVS
 fi
 
-#Command to open a repo.
+#Will create the directory containing the older versions of projects if History does not exist.
+if test -d ./.History; then
+	echo ""
+else
+	mkdir .History
+	echo ""
+fi
+
+currentDir=null
+
+#Command to open a directory.
 openDir()
 {
 	#Loops as long as a directory has not been selected or exits if there are no directories to open.
@@ -27,6 +37,10 @@ openDir()
 				if test -d $dir; then
 					#Open directory and display contents as well as current directory location.
 					cd $dir
+					#If the directory is a repo the currentRepo var changes.
+					if [[ $1 -eq 1 ]]; then
+						currentRepo=$dir
+					fi
 					pwd
 					echo ""
 					selectDir=1
@@ -43,7 +57,7 @@ openDir()
 		done
 }
 
-#Will create a repo.
+#Will create a directory.
 createDir()
 {
 	createdDir=0
@@ -57,13 +71,17 @@ createDir()
 			echo ""
 		else
 			mkdir $reponame
+			#If directory is a repo following makes a directory to track the history of the repo. 
+			if [[ $1 -eq 1 ]]; then
+				mkdir ~/CVS/.History/$reponame
+			fi
 			createdDir=1
 			echo ""
 		fi
 	done		
 }
 
-#Deletes a repo.
+#Deletes a directory.
 deleteDir()
 {
 	deletedir=0
@@ -73,15 +91,27 @@ deleteDir()
 		if [[ "$(ls -d *)" ]]; then
 			echo "Directory list:"
 			ls -d *
-			dir=null
 			echo "Type the name of the directory to delete."
 			read dir
 			#Tests if directory exists.
 			if test -d $dir; then
-				rm -Rf $dir
-				deletedir=1
-				echo "Successfully deleted repository."
-				echo ""
+				echo "Are you sure you want to delete the directory and all of its files(This is irreversible) [y/n]"
+				read del
+				#Ensures the user wishes to delete the repository.
+				if [[ del = "y" ]]; then
+					#Deletes the directory along with the files and sub directories within it.
+					rm -Rf $dir
+					#If directory is a repo following deletes history of repo. 
+					if [[ $1 -eq 1 ]]; then
+						rm -Rf ~/CVS/.History/$dir
+					fi
+					deletedir=1
+					echo "Successfully deleted repository."
+					echo ""
+				else
+					deletedir=1
+					echo "Deleting cancelled."
+				fi
 			else
 				echo "Directory not found. Try again." 
 			fi
@@ -108,14 +138,47 @@ createFile()
 			echo "File already exists."
 			echo ""
 		else
-			#Create file
+			#Create file and exit loop.
 			touch $file
 			fileCreated=1
 		fi
 	done
 }
 
-#REQUIRES LOG IMPLEMENTATION
+#Will track the changes between last version of the file and the current one.
+trackChanges()
+{
+	diff $1 $2 >> log
+}
+
+#INCOMPLETE
+#Will commit changes.
+commit()
+{
+	#Adds information of commit to log file.
+	echo "Task:	Commit Files." >> log
+	echo "User:	$USER" >> log
+	echo "Time:	$(date)" >> log
+	echo "Repo:	$(pwd)" >> log
+
+	newestDate=null
+	#if repository is empty print error otherwise continue with commiting files.
+	if [[ $(ls) ]]; then
+		#Opens the .History directory to make a directory with the time/date within the relevant repo.
+		cd .. | cd .History/$currentRepo
+		#Stores the date/time in a variable, then makes a directory with the date/time as its name.
+		time=$(date)
+		mkdir "$time"
+
+		#Return to the current working directory.
+		cd ../.. |  cd $currentRepo
+		#Copy Repo to current version folder.
+		cp -r -f -t ~/CVS/.History/$currentRepo/$(date) $(pwd)
+	else
+		echo "Unable to commit files due to empty repository."
+	fi
+}
+
 #Will open a text file in sublime text.
 openFile()
 {
@@ -147,18 +210,12 @@ openFile()
 #Will append information to a log file when a text file is opened.
 logFileEdit()
 {
-	echo "Task:			Open text file for possible edits." >> log.txt
-	echo "User:			$USER" >> log.txt
-	echo "Time:			$(date)" >> log.txt
-	echo "File:			$1" >> log.txt
-	echo "Directory:	$(pwd)" >> log.txt
+	echo "Task:			Open text file for possible edits." >> log
+	echo "User:			$USER" >> log
+	echo "Time:			$(date)" >> log
+	echo "File:			$1" >> log
+	echo "Directory:	$(pwd)" >> log
 }
-
-#Will commit files
-#commit()
-#{
-
-#}
 
 #INCOMPLETE
 #Menu for once a project has been opened.
