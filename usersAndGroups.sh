@@ -51,8 +51,9 @@ addUsers "$groupName"
 }
 
 #View Members in Group
-viewMembers $groupName
+viewMembers
 {
+    $groupname = stat -c "%G" $pwd
     if [ "$(getent group $groupName)" ]; then
         grep $groupName /etc/group
     else 
