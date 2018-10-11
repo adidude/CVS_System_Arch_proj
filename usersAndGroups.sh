@@ -119,11 +119,3 @@ confirm $decision
         ;;
     esac
 }
-
-#Check If User Exists
-#citation: https://ubuntuforums.org/showthread.php?t=1792819
-UserExist()
-{
-   awk -F":" '{ print $1 }' /etc/passwd | grep -x $1 > /dev/null
-   return $?
-}
