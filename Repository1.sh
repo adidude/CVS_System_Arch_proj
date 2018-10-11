@@ -63,9 +63,7 @@ Difference()
  echo " $comments" >> log.txt
 
 #compares two files side by side and log them on file.
-diff -ry  $org_file $new_file >> log.txt
-
-#grep -n -v -f $org_file $new_file >> log.txt
+diff $org_file $new_file >> log.txt
 
 echo " changes logged to log.txt file sucessfully!"
 }
