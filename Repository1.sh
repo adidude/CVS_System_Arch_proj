@@ -46,25 +46,26 @@ ListFiles()
 Difference()
 {
 	echo "========================"
-	echo "please enter original file path (e.g. /home/Ubuntu/file1):"
+	echo "please enter original file path (e.g. /home/user/file1):"
 	read org_file
-	echo "please enter new file path (e.g. /home/Ubuntu/file2):"
+	echo "please enter new file path (e.g. /home/user/file2):"
 	read new_file
 
+	echo "              New changes             ">> log.txt
+	echo "--------------------------------------">> log.txt
 
-	echo "=============">> log.txt
- # logs the username
- echo "$(whoami)" >> log.txt
- #logs the date and time 
- echo " $(date)" "$input " >> log.txt 
- #Ask for comments about changes made and log them on file.
+ # logs the username ,date and time
+ echo "$(whoami)" >> log.txt  
+ echo "$(date)" "$input " >> log.txt 
+ #Asks for comments about changes made and log them on file.
  echo " please enter any comments you have about these changes"
  read comments
  echo " $comments" >> log.txt
 
 #compares two files side by side and log them on file.
-diff -ry $org_file $new_file >> log.txt
+diff -ry  $org_file $new_file >> log.txt
 
+#grep -n -v -f $org_file $new_file >> log.txt
 
 echo " changes logged to log.txt file sucessfully!"
 }
