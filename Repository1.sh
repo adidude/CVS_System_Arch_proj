@@ -1,13 +1,16 @@
+#Authors: Aditya Kumar Menon,	Mandar Tamhane,		Rauf Nawaz Tarar
+#MatricNo.: 170025886			170021792			170012145
 
 #This function archives the project in three different formats.
 Archive()
 {
-	read -p "\nplease enter the file location you want to Archive (e.g. /home/user/file1): " SFOLDER1
+	ls ~/CVS/
+	read -p "\nplease enter the repository you want to Archive: " SFOLDER1
 	read -p "Please enter the location to save this zip file (e.g. /home/user/repository):" DFOLDER1
 	read -p "Select archive type (zip or tar.gz,):" COMPRES1
 	case $COMPRES1 in
-		zip) zip -erj ${DFOLDER1}/file1.zip $SFOLDER1;; # for zip 
-		tar.gz) tar cvfz ${DFOLDER1}/file1.tar.gz $SFOLDER1;; # for tar.gz
+		zip) zip -erj ${DFOLDER1}/$(SFOLDER1).zip ~/CVS/$SFOLDER1;; # for zip 
+		tar.gz) tar cvfz ${DFOLDER1}/$(SFOLDER1).tar.gz ~/CVS/$SFOLDER1;; # for tar.gz
 		
 
  # Error handling for entering wrong type, shows an error message
@@ -32,11 +35,17 @@ EditFile()
 #This function lists all the files in directory
 ListFiles()
 {
-	echo "Enter the full path of repository you want to see (e.g. /home/user/repository):"
-	read repo_path
-	for entry in "$repo_path"/*
-	do
-		echo "$entry"
+	echo "Enter the name of repository you want to see:"
+	ls ~/CVS
+	listed=0
+	while [[ listed -eq 0 ]]; do
+		read repo_path
+		if [[ -d ~/CVS/$(repo_path) ]]; then
+			for entry in ~/CVS/$(repo_path)/*
+			do
+				echo "$entry"
+			done
+		fi
 	done
 }
 
@@ -51,49 +60,11 @@ Difference()
 	echo "please enter new file path (e.g. /home/user/file2):"
 	read new_file
 
-	echo "              New changes             ">> log.txt
-	echo "--------------------------------------">> log.txt
+	echo "              Changes             " > diff
+	echo "--------------------------------------" > diff
 
- # logs the username ,date and time
- echo "$(whoami)" >> log.txt  
- echo "$(date)" "$input " >> log.txt 
- #Asks for comments about changes made and log them on file.
- echo " please enter any comments you have about these changes"
- read comments
- echo " $comments" >> log.txt
+	#compares two files side by side and log them on file.
+	diff $org_file $new_file > diff
 
-#compares two files side by side and log them on file.
-diff $org_file $new_file >> log.txt
-
-echo " changes logged to log.txt file sucessfully!"
+	echo "Differences can be viewed in diff file."
 }
-
-
-
-# Menu 
-while true
-do
-	
-	
-	echo "---------Main Menu---------"
-	echo "1) Archive Project"
-	echo "2) Edit file"
-	echo "3) ListFiles"
-	echo "4) Difference"
-	echo "e) Exit"
-	echo "Please select one of the options"
-
-	read choice # Reads user's choice
-
-	case "$choice" in
-		
-1) Archive;;
-2) EditFile;;
-3) ListFiles;;
-4) Difference;;
-
-e) exit;;
-esac
-done
-
-

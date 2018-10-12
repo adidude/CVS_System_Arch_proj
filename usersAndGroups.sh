@@ -1,3 +1,5 @@
+#Authors: Aditya Kumar Menon,   Mandar Tamhane,     Rauf Nawaz Tarar
+#MatricNo.: 170025886           170021792           170012145
 #Create a new group
 createGroup()
 {

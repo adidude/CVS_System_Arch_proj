@@ -1,6 +1,8 @@
+#Authors: Aditya Kumar Menon,	Mandar Tamhane,		Rauf Nawaz Tarar
+#MatricNo.: 170025886			170021792			170012145
 source ./Repository1
-
 source ./usersAndGroups.sh
+
 exit=0
 
 #Will open and/or create the directory containing the repositories being worked with.
@@ -172,6 +174,9 @@ commit()
 	echo "User:	$USER" >> log
 	echo "Time:	$(date)" >> log
 	echo "Repo:	$(pwd)" >> log
+	echo "Please enter a comment with information on changes."
+	read comment
+	echo "Comment: $comment" >> log
 
 	#if repository is empty print error otherwise continue with commiting files.
 	if [[ $(ls) ]]; then
@@ -260,6 +265,7 @@ openFile()
 #Will append information to a log file when a text file is opened.
 logFileEdit()
 {
+	echo "===================================================="
 	echo "Task:			Open text file for possible edits." >> log.txt
 	echo "User:			$USER" >> log.txt
 	echo "Time:			$(date)" >> log.txt
@@ -312,7 +318,6 @@ rollBack()
 	done
 }
 
-#INCOMPLETE
 #Menu for once a project has been opened.
 projectMenu()
 {
@@ -320,11 +325,11 @@ projectMenu()
 	while [[ exitMenu -eq 0 ]]; do
 		echo "Please select a task with relevant number." 
 		echo "1) Create file"
-		echo "2) Open text file"
-		echo "3) Commit file"
-		echo "4) Commit all changes"
-		echo "5) Open directory"
-		echo "6) Mange Permissions"
+		echo "2) Edit text file in sublime text"
+		echo "3) Edit text file in terminal"
+		echo "3) Commit Changes"
+		echo "4) Open directory"
+		echo "5) Manage Permissions"
 		echo "0) Exit repository"
 
 		#Handles user input.
@@ -336,8 +341,10 @@ projectMenu()
 			createFile
 		elif [[ option -eq 2 ]]; then
 			openFile
-		#elif [[ option -eq 3 ]]; then
-			
+		elif [[ option -eq 3 ]]; then
+			EditFile
+		elif [[ option -eq 4 ]]; then
+			commit
 		elif [[ option -eq 5 ]]; then
 			openDir
 		elif [[ option -eq 6 ]]; then
@@ -359,7 +366,7 @@ while [[ exit -ne 1 ]]; do
 	echo "2) Create Repository"
 	echo "3) Delete Repository"
 	echo "4) Archive Repository"
-	echo "5) "
+	echo "5) Peek at files in Repository"
 	echo "0) Exit Program"
 
 	#Handles user input.
@@ -375,6 +382,8 @@ while [[ exit -ne 1 ]]; do
 		deleteDir 1
 	elif [[ option -eq 4 ]]; then
 		Archive
+	elif [[ option -eq 5 ]]; then
+		ListFiles
 	else
 		echo "Invalid value. Try again."
 		echo ""
