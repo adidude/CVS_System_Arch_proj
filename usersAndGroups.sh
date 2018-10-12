@@ -3,7 +3,7 @@ createGroup()
 {
     echo -n "Enter name of the new group you would like: "
     read groupName
-    if [ "$(getent group $groupName)" ]; then
+    if [ "$(getent group $groupName)" ]; then #Check if group already exists
         echo "Group $groupName already exists"
     else
         sudo groupadd $groupName
@@ -15,7 +15,7 @@ addToGroup()
 {
     echo -n "Which group would you like to add users to?"
     read groupName
-    if [ "$(getent group $groupName)" ]; then
+    if [ "$(getent group $groupName)" ]; then #Check if group exists
         addUsers $groupName
     else
     {
@@ -33,17 +33,18 @@ addUsers "$groupName"
     while [ "$noOfUsers" != 0 ]
     do
         echo "Enter name of user"
-        read newUser
+        read newUser #Get name for users
         if [ -z "$(getent passwd $newUser)" ]; then
-            sudo usermod -a -G $groupName $newUser
+            sudo usermod -a -G $groupName $newUser #add user to the group
             echo "User $newUser was added to group $groupName"
         else
-            echo "User $newUser couldn't be added to the group because the user doesn't exist. Create user first? Y/N: "
+            echo "User $newUser couldn't be added to the group because the user doesn't exist. Create user first? Y/N: " #ask to create new user
             read decision
             if confirm $decision ; then
                 echo "Enter the name for the user"
                     read userName
                     sudo useradd -m $userName
+                    sudo usermod -a -G $groupName $userName
             fi
         fi
         noOfUsers--
@@ -51,10 +52,11 @@ addUsers "$groupName"
 }
 
 #View Members in Group
-viewMembers $groupName
+viewMembers
 {
+    $groupname = stat -c "%G" $pwd
     if [ "$(getent group $groupName)" ]; then
-        grep $groupName /etc/group
+        grep $groupName /etc/group #get name of the group
     else 
         echo "Group doesn't exist. Create the group first."
     fi
@@ -119,3 +121,4 @@ confirm $decision
         ;;
     esac
 }
+
