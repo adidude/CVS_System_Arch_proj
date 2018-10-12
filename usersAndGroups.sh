@@ -27,7 +27,7 @@ addToGroup()
 }
 
 #Add users
-addUsers "$groupName"
+addUsers $groupName
 {
     echo "How many users do you want to add to this group: "
     read noOfUsers
@@ -63,13 +63,13 @@ viewMembers $groupName
 }
 
 #View Owner of Directory
-viewOwner "$path"
+viewOwner $path
 {
     ls -l "$path"
 }
 
 #Share file with group
-shareFile "$path"
+shareFile $path
 {
     echo "Which group would you like to share this file with?"
     read groupName;
