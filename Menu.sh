@@ -161,19 +161,34 @@ commit()
 	echo "Time:	$(date)" >> log
 	echo "Repo:	$(pwd)" >> log
 
-	newestDate=null
 	#if repository is empty print error otherwise continue with commiting files.
 	if [[ $(ls) ]]; then
 		#Opens the .History directory to make a directory with the time/date within the relevant repo.
-		cd .. | cd .History/$currentRepo
+		cd ~/CVS/.History/$currentRepo
 		#Stores the date/time in a variable, then makes a directory with the date/time as its name.
-		time=$(date)
+		time=$(date +%Y%m%d%H%M%S)
 		mkdir "$time"
 
 		#Return to the current working directory.
-		cd ../.. |  cd $currentRepo
+		cd ~/CVS/$currentRepo
 		#Copy Repo to current version folder.
 		cp -r -f -t ~/CVS/.History/$currentRepo/$(date) $(pwd)
+
+		#If there are files in the history folder of the current directory.
+		if [[ $(ls ~/CVS/.History/$currentRepo) ]]; then
+			latestDir=0
+			secondLatestDir=0
+			#read each entry and compare it to the largest value.
+			for entry in ~/CVS/.History/$currentRepo
+			do
+				#If the entry is greater than the newest directory.
+				if [[ $entry -gt latestDir ]]; then
+					secondLatestDir=$latestDir
+					latestDir=$entry
+				fi
+			done
+			#COMPARE FILES HERE
+		fi
 	else
 		echo "Unable to commit files due to empty repository."
 	fi
