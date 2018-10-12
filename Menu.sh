@@ -64,7 +64,7 @@ openDir()
 		done
 }
 
-#Will create a repo.
+#Will create a repo. $1 determines if the directory is a repo.
 createDir()
 {
 	createdDir=0
@@ -91,7 +91,7 @@ createDir()
 	createGroup
 }
 
-#Deletes a repo.
+#Deletes a repo. $1 determines if the directory is a repo.
 deleteDir()
 {
 	deletedir=0
@@ -379,7 +379,7 @@ while [[ exit -ne 1 ]]; do
 	if [[ option -eq 0 ]]; then
 		exit=1
 	elif [[ option -eq 1 ]]; then
-		openDir
+		openDir 1
 	elif [[ option -eq 2 ]]; then
 		createDir 1
 	elif [[ option -eq 3 ]]; then
