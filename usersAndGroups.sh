@@ -27,7 +27,7 @@ addToGroup()
 }
 
 #Add users
-addUsers
+addUsers()
 {
     echo "How many users do you want to add to this group: "
     read noOfUsers
@@ -53,7 +53,7 @@ addUsers
 }
 
 #View Members in Group
-viewMembers 
+viewMembers()
 {
     if [ "$(getent group $1)" ]; then
         grep $1 /etc/group
@@ -63,13 +63,13 @@ viewMembers
 }
 
 #View Owner of Directory
-viewOwner
+viewOwner()
 {
     ls -l "$1"
 }
 
 #Share file with group
-shareFile
+shareFile()
 {
     echo "Which group would you like to share this file with?"
     read groupName;
@@ -104,13 +104,13 @@ shareFile
 }
 
 #View files shared with group
-viewFiles
+viewFiles()
 {
     find "$2" -group "$1"
 }
 
 #Check if Y or N
-confirm
+confirm()
 {
     case $1 in
     [yY][eE][sS]|[yY])
