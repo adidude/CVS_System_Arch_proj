@@ -302,12 +302,14 @@ rollBack()
 #This function archives the project in three different formats.
 Archive()
 {
+	echo "Repo List:"
 	ls ~/CVS/
-	read -p "\nplease enter the repository you want to Archive: " SFOLDER1
+	echo ""
+	read -p "Please enter the repository you want to Archive: " SFOLDER1
 	read -p "Please enter the location to save this zip file (e.g. /home/user/repository):" DFOLDER1
 	read -p "Select archive type (zip or tar.gz,):" COMPRES1
 	case $COMPRES1 in
-		zip) zip -erj ${DFOLDER1}/$(SFOLDER1).zip ~/CVS/$SFOLDER1;; # for zip 
+		zip) zip -erj ${DFOLDER1}/$(SFOLDER1).zip ~/CVS/$(SFOLDER1);; # for zip 
 		tar.gz) tar cvfz ${DFOLDER1}/$(SFOLDER1).tar.gz ~/CVS/$SFOLDER1;; # for tar.gz
 		
 
@@ -338,11 +340,12 @@ ListFiles()
 	listed=0
 	while [[ listed -eq 0 ]]; do
 		read repo_path
-		if [[ -d ~/CVS/$(repo_path) ]]; then
-			for entry in ~/CVS/$(repo_path)/*
+		if [[ -d ~/CVS/$repo_path ]]; then
+			for entry in ~/CVS/$repo_path/*
 			do
 				echo "$entry"
 			done
+			listed=1
 		fi
 	done
 }
