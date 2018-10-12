@@ -27,7 +27,7 @@ addToGroup()
 }
 
 #Add users
-addUsers $groupName
+addUsers
 {
     echo "How many users do you want to add to this group: "
     read noOfUsers
@@ -37,8 +37,8 @@ addUsers $groupName
         echo "Enter name of user"
         read newUser
         if [ -z "$(getent passwd $newUser)" ]; then
-            sudo usermod -a -G $groupName $newUser
-            echo "User $newUser was added to group $groupName"
+            sudo usermod -a -G $1 $newUser
+            echo "User $newUser was added to group $1"
         else
             echo "User $newUser couldn't be added to the group because the user doesn't exist. Create user first? Y/N: "
             read decision
@@ -53,23 +53,23 @@ addUsers $groupName
 }
 
 #View Members in Group
-viewMembers $groupName
+viewMembers 
 {
-    if [ "$(getent group $groupName)" ]; then
-        grep $groupName /etc/group
+    if [ "$(getent group $1)" ]; then
+        grep $1 /etc/group
     else 
         echo "Group doesn't exist. Create the group first."
     fi
 }
 
 #View Owner of Directory
-viewOwner $path
+viewOwner
 {
-    ls -l "$path"
+    ls -l "$1"
 }
 
 #Share file with group
-shareFile $path
+shareFile
 {
     echo "Which group would you like to share this file with?"
     read groupName;
@@ -83,13 +83,13 @@ shareFile $path
         echo "Enter your choice: "
         read choice
         case $choice in
-            1) chmod 7740 "$groupName" "$path"
+            1) chmod 7740 "$groupName" "$1"
                 ;;
-            2) chmod 7720 "$groupName" "$path"
+            2) chmod 7720 "$groupName" "$1"
                 ;;
-            3) chmod 7750 "$groupName" "$path"
+            3) chmod 7750 "$groupName" "$1"
                 ;;
-            4) chmod 7770 "$groupName" "$path"
+            4) chmod 7770 "$groupName" "$1"
                 ;;
         esac
     else
@@ -104,15 +104,15 @@ shareFile $path
 }
 
 #View files shared with group
-viewFiles "$groupName" "$directoryName"
+viewFiles
 {
-    find "$directoryName" -group "$groupName"
+    find "$2" -group "$1"
 }
 
 #Check if Y or N
-confirm $decision
+confirm
 {
-    case $decision in
+    case $1 in
     [yY][eE][sS]|[yY])
         return 1
         ;;
