@@ -1,4 +1,6 @@
 source ./Repository1
+
+source ./usersAndGroups.sh
 exit=0
 
 #Will open and/or create the directory containing the repositories being worked with.
@@ -39,14 +41,11 @@ openDir()
 				if test -d $dir; then
 					#Open directory and display contents as well as current directory location.
 					cd $dir
-					#If the directory is a repo the currentRepo var changes.
-					if [[ $1 -eq 1 ]]; then
-						currentRepo=$dir
-					fi
 					pwd
 					echo ""
 					selectDir=1
 					projectMenu
+					
 				else
 					echo "Directory not found. Try again."
 					echo ""
@@ -59,7 +58,7 @@ openDir()
 		done
 }
 
-#Will create a directory. $1 Is the variable to determine if the repo's history files get created.
+#Will create a repo.
 createDir()
 {
 	createdDir=0
@@ -82,10 +81,11 @@ createDir()
 			createdDir=1
 			echo ""
 		fi
-	done		
+	done	
+	createGroup
 }
 
-#Deletes a directory. $1 is the variable to determine if the repo's history files get deleted. 
+#Deletes a repo.
 deleteDir()
 {
 	deletedir=0
@@ -95,6 +95,7 @@ deleteDir()
 		if [[ "$(ls -d *)" ]]; then
 			echo "Directory list:"
 			ls -d *
+			dir=null
 			echo "Type the name of the directory to delete."
 			read dir
 			#Tests if directory exists.
@@ -155,7 +156,7 @@ createFile()
 			echo "File already exists."
 			echo ""
 		else
-			#Create file and exit loop.
+			#Create file
 			touch $file
 			fileCreated=1
 		fi
@@ -256,14 +257,14 @@ openFile()
 	done
 }
 
-#Will append information to a log file when a text file is opened. $1 is the file name.
+#Will append information to a log file when a text file is opened.
 logFileEdit()
 {
-	echo "Task:			Open text file for possible edits." >> log
-	echo "User:			$USER" >> log
-	echo "Time:			$(date)" >> log
-	echo "File:			$1" >> log
-	echo "Directory:	$(pwd)" >> log
+	echo "Task:			Open text file for possible edits." >> log.txt
+	echo "User:			$USER" >> log.txt
+	echo "Time:			$(date)" >> log.txt
+	echo "File:			$1" >> log.txt
+	echo "Directory:	$(pwd)" >> log.txt
 }
 
 #Will allow user to return to an older version of the current repo.
@@ -320,8 +321,10 @@ projectMenu()
 		echo "Please select a task with relevant number." 
 		echo "1) Create file"
 		echo "2) Open text file"
-		echo "3) Commit changes"
-		echo "4) Open directory"
+		echo "3) Commit file"
+		echo "4) Commit all changes"
+		echo "5) Open directory"
+		echo "6) Mange Permissions"
 		echo "0) Exit repository"
 
 		#Handles user input.
@@ -333,10 +336,12 @@ projectMenu()
 			createFile
 		elif [[ option -eq 2 ]]; then
 			openFile
-		elif [[ option -eq 3 ]]; then
-			commit
-		elif [[ option -eq 4 ]]; then
+		#elif [[ option -eq 3 ]]; then
+			
+		elif [[ option -eq 5 ]]; then
 			openDir
+		elif [[ option -eq 6 ]]; then
+			dirMenu
 		else
 			echo "Invalid value. Try again."
 			echo ""
@@ -375,3 +380,37 @@ while [[ exit -ne 1 ]]; do
 		echo ""
 	fi
 done
+
+dirMenu()
+{
+	exitMenu=0
+	while [[ exitMenu -eq 0 ]]; do
+		echo "Please select a task with relevant number." 
+		echo "The Current group is" stat -c "%G" $pwd
+		echo "1) View Owner"
+		echo "2) View Members"
+		echo "3) Add Members to Group"
+		echo "4) Share Repository"
+		echo "0) Exit Menu"
+
+		#Handles user input.
+		option=999
+		read option
+		if [[ option -eq 0 ]]; then
+			exitMenu=1
+		elif [[ option -eq 1 ]]; then
+			viewOwner
+		elif [[ option -eq 2 ]]; then
+			viewMembers
+		elif [[ option -eq 3 ]]; then
+			addToGroup
+		elif [[ option -eq 4 ]]; then
+			shareFile "$pwd"
+		else
+			echo "Invalid value. Try again."
+			echo ""
+		fi
+	done
+	cd ..
+}
+
