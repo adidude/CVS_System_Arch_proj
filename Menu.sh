@@ -18,7 +18,7 @@ fi
 
 currentDir=null
 
-#Command to open a directory.
+#Command to open a directory. $1 determines if the current directory is a repo.
 openDir()
 {
 	#Loops as long as a directory has not been selected or exits if there are no directories to open.
@@ -57,7 +57,7 @@ openDir()
 		done
 }
 
-#Will create a directory.
+#Will create a directory. $1 Is the variable to determine if the repo's history files get created.
 createDir()
 {
 	createdDir=0
@@ -81,7 +81,7 @@ createDir()
 	done		
 }
 
-#Deletes a directory.
+#Deletes a directory. $1 is the variable to determine if the repo's history files get deleted. 
 deleteDir()
 {
 	deletedir=0
@@ -97,12 +97,13 @@ deleteDir()
 			if test -d $dir; then
 				echo "Are you sure you want to delete the directory and all of its files(This is irreversible) [y/n]"
 				read del
+
 				#Ensures the user wishes to delete the repository.
 				if [[ del = "y" ]]; then
 					#Deletes the directory along with the files and sub directories within it.
 					rm -Rf $dir
 					#If directory is a repo following deletes history of repo. 
-					if [[ $1 -eq 1 ]]; then
+					if [[ $2 -eq 1 ]]; then
 						rm -Rf ~/CVS/.History/$dir
 					fi
 					deletedir=1
@@ -145,13 +146,6 @@ createFile()
 	done
 }
 
-#Will track the changes between last version of the file and the current one.
-trackChanges()
-{
-	diff $1 $2 >> log
-}
-
-#INCOMPLETE
 #Will commit changes.
 commit()
 {
@@ -172,7 +166,7 @@ commit()
 		#Return to the current working directory.
 		cd ~/CVS/$currentRepo
 		#Copy Repo to current version folder.
-		cp -r -f -t ~/CVS/.History/$currentRepo/$(date) $(pwd)
+		cp -r -f -t ~/CVS/.History/$currentRepo/$time $(pwd)
 
 		echo "Commit Summary:" >> log
 		echo "" >> log
@@ -243,7 +237,7 @@ openFile()
 	done
 }
 
-#Will append information to a log file when a text file is opened.
+#Will append information to a log file when a text file is opened. $1 is the file name.
 logFileEdit()
 {
 	echo "Task:			Open text file for possible edits." >> log
@@ -251,6 +245,38 @@ logFileEdit()
 	echo "Time:			$(date)" >> log
 	echo "File:			$1" >> log
 	echo "Directory:	$(pwd)" >> log
+}
+
+#Will allow user to return to an older version of the current repo.
+rollBack()
+{
+	loopExit=0
+	#While the repo has not been rolled back.
+	while [[ loopExit -eq 0 ]]; do
+		#If there are pre existing versions of the current repo.
+		if [[ $(ls ~/CVS/.History/$currentRepo) ]]; then
+			echo "Past versions of $currentRepo (YYYYMMDDHHmmSS):"
+			ls ~/CVS/.History/$currentRepo
+			echo "Enter the name of the version you would like to return to."
+			read ver
+			#If the directory specified by the user exists
+			if [[ -d ~/CVS/.History/$currentRepo/$ver ]]; then
+				#Delete contents of currentRepo.
+				rm -Rf ~/CVS/$currentRepo/*
+				#Copy files from History to current repo.
+				cp -r -f -t ~/CVS/$currentRepo ~/CVS/.History/$currentRepo/$ver
+
+				echo "Roll back Successfully executed."
+				loopExit=1
+			else
+				echo "Directory does not exist. Try again. "
+			fi
+		else
+			#Exits loop due to inability to roll back.
+			echo "No older versions to return to."
+			loopExit=1
+		fi
+	done
 }
 
 #INCOMPLETE
@@ -262,9 +288,8 @@ projectMenu()
 		echo "Please select a task with relevant number." 
 		echo "1) Create file"
 		echo "2) Open text file"
-		echo "3) Commit file"
-		echo "4) Commit all changes"
-		echo "5) Open directory"
+		echo "3) Commit changes"
+		echo "4) Open directory"
 		echo "0) Exit repository"
 
 		#Handles user input.
@@ -276,9 +301,9 @@ projectMenu()
 			createFile
 		elif [[ option -eq 2 ]]; then
 			openFile
-		#elif [[ option -eq 3 ]]; then
-			
-		elif [[ option -eq 5 ]]; then
+		elif [[ option -eq 3 ]]; then
+			commit
+		elif [[ option -eq 4 ]]; then
 			openDir
 		else
 			echo "Invalid value. Try again."
