@@ -87,7 +87,7 @@ deleteDir()
 				read del
 
 				#Ensures the user wishes to delete the repository.
-				if [[ del = "y" ]]; then
+				if [[ $del = "y" ]]; then
 					#Deletes the directory along with the files and sub directories within it.
 					rm -Rf $dir
 					#If directory is a repo following deletes history of repo. 
