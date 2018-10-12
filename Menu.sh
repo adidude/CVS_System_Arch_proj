@@ -174,20 +174,41 @@ commit()
 		#Copy Repo to current version folder.
 		cp -r -f -t ~/CVS/.History/$currentRepo/$(date) $(pwd)
 
-		#If there are files in the history folder of the current directory.
-		if [[ $(ls ~/CVS/.History/$currentRepo) ]]; then
-			latestDir=0
-			secondLatestDir=0
-			#read each entry and compare it to the largest value.
-			for entry in ~/CVS/.History/$currentRepo
+		echo "Commit Summary:" >> log
+		echo "" >> log
+
+		latestDir=0
+		secondLatestDir=0
+		#read each entry and compare it to the largest value.
+		for entry in ~/CVS/.History/$currentRepo
+		do
+			#If the entry is greater than the newest directory.
+			if [[ $entry -gt latestDir ]]; then
+				secondLatestDir=$latestDir
+				latestDir=$entry
+			fi
+		done
+
+		#If there exists a folder for the second latest directory.
+		if [[ -d ~/CVS/.History/$currentRepo/$secondLatestDir ]]; then
+			#For each entry in the second latest directory in the history directory for the current repo.
+			for entry in ~/CVS/.History/$currentRepo/$secondLatestDir
 			do
-				#If the entry is greater than the newest directory.
-				if [[ $entry -gt latestDir ]]; then
-					secondLatestDir=$latestDir
-					latestDir=$entry
-				fi
+				#If that entry exists in the newly committed directory.
+				if [[ -e ~/CVS/.History/$currentRepo/$latestDir/$entry ]]; then
+					#Append changes between files to the log file.
+					echo "Changes to $entry :" >> log
+					diff $entry ~/CVS/.History/$currentRepo/$latestDir/$entry >> log
+				else
+					echo "File $entry has been deleted." >> log
+				fi			
 			done
-			#COMPARE FILES HERE
+		else
+			#For each entry append the files added to log.
+			for entry in ~/CVS/.History/$currentRepo/$latestDir
+			do
+				echo "Added $entry" >> log
+			done
 		fi
 	else
 		echo "Unable to commit files due to empty repository."
