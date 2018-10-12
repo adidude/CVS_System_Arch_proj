@@ -1,3 +1,4 @@
+source ./Repository1
 exit=0
 
 #Will open and/or create the directory containing the repositories being worked with.
@@ -13,6 +14,7 @@ if test -d ./.History; then
 	echo ""
 else
 	mkdir .History
+	lockHistory
 	echo ""
 fi
 
@@ -73,7 +75,9 @@ createDir()
 			mkdir $reponame
 			#If directory is a repo following makes a directory to track the history of the repo. 
 			if [[ $1 -eq 1 ]]; then
+				unlockHistory
 				mkdir ~/CVS/.History/$reponame
+				lockHistory
 			fi
 			createdDir=1
 			echo ""
@@ -103,8 +107,10 @@ deleteDir()
 					#Deletes the directory along with the files and sub directories within it.
 					rm -Rf $dir
 					#If directory is a repo following deletes history of repo. 
-					if [[ $2 -eq 1 ]]; then
+					if [[ $1 -eq 1 ]]; then
+						unlockHistory
 						rm -Rf ~/CVS/.History/$dir
+						lockHistory
 					fi
 					deletedir=1
 					echo "Successfully deleted repository."
@@ -122,6 +128,16 @@ deleteDir()
 			deletedir=1
 		fi
 	done
+}
+
+lockHistory()
+{
+	chmod 440 ~/CVS/.History
+}
+
+unlockHistory()
+{
+	chmod 770 ~/CVS/.History
 }
 
 #Will create a file specified by the user.
@@ -150,6 +166,7 @@ createFile()
 commit()
 {
 	#Adds information of commit to log file.
+	echo "=========================" >> log
 	echo "Task:	Commit Files." >> log
 	echo "User:	$USER" >> log
 	echo "Time:	$(date)" >> log
@@ -158,6 +175,7 @@ commit()
 	#if repository is empty print error otherwise continue with commiting files.
 	if [[ $(ls) ]]; then
 		#Opens the .History directory to make a directory with the time/date within the relevant repo.
+		unlockHistory
 		cd ~/CVS/.History/$currentRepo
 		#Stores the date/time in a variable, then makes a directory with the date/time as its name.
 		time=$(date +%Y%m%d%H%M%S)
@@ -204,6 +222,7 @@ commit()
 				echo "Added $entry" >> log
 			done
 		fi
+		lockHistory
 	else
 		echo "Unable to commit files due to empty repository."
 	fi
@@ -254,6 +273,7 @@ rollBack()
 	#While the repo has not been rolled back.
 	while [[ loopExit -eq 0 ]]; do
 		#If there are pre existing versions of the current repo.
+		unlockHistory
 		if [[ $(ls ~/CVS/.History/$currentRepo) ]]; then
 			echo "Past versions of $currentRepo (YYYYMMDDHHmmSS):"
 			ls ~/CVS/.History/$currentRepo
@@ -261,11 +281,23 @@ rollBack()
 			read ver
 			#If the directory specified by the user exists
 			if [[ -d ~/CVS/.History/$currentRepo/$ver ]]; then
+				#Add details to log file.
+				echo "=========================" >> log
+				echo "Task:	Roll repo back." >> log
+				echo "User:	$USER" >> log
+				echo "Time:	$(date)" >> log
+				echo "Repo:	$currentRepo" >> log
+
+
+				#Moves log file to CVS directory
+				mv -t ~/CVS ~/CVS/$currentRepo/log
 				#Delete contents of currentRepo.
 				rm -Rf ~/CVS/$currentRepo/*
 				#Copy files from History to current repo.
 				cp -r -f -t ~/CVS/$currentRepo ~/CVS/.History/$currentRepo/$ver
-
+				#Move log file back to its directory.
+				mv -f -t ~/CVS/$currentRepo ~/CVS/log
+				lockHistory
 				echo "Roll back Successfully executed."
 				loopExit=1
 			else
@@ -322,7 +354,7 @@ while [[ exit -ne 1 ]]; do
 	echo "2) Create Repository"
 	echo "3) Delete Repository"
 	echo "4) Archive Repository"
-	echo "5) Clone Repository"
+	echo "5) "
 	echo "0) Exit Program"
 
 	#Handles user input.
@@ -333,11 +365,11 @@ while [[ exit -ne 1 ]]; do
 	elif [[ option -eq 1 ]]; then
 		openDir
 	elif [[ option -eq 2 ]]; then
-		createDir
+		createDir 1
 	elif [[ option -eq 3 ]]; then
-		deleteDir
-	#elif [[ option -eq 4 ]]; then
-		#statements
+		deleteDir 1
+	elif [[ option -eq 4 ]]; then
+		Archive
 	else
 		echo "Invalid value. Try again."
 		echo ""
