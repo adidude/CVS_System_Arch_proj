@@ -1,5 +1,7 @@
 #Authors: Aditya Kumar Menon,   Mandar Tamhane,     Rauf Nawaz Tarar
 #MatricNo.: 170025886           170021792           170012145
+#Description: Will allow Groups and permissions to be set.
+
 #Create a new group
 createGroup()
 {
@@ -9,6 +11,7 @@ createGroup()
         echo "Group $groupName already exists"
     else
         sudo groupadd $groupName
+        echo ""
     fi
 }
 

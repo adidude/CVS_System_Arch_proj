@@ -1,7 +1,8 @@
 #Authors: Aditya Kumar Menon,	Mandar Tamhane,		Rauf Nawaz Tarar
 #MatricNo.: 170025886			170021792			170012145
-source ./Repository1.sh
-source ./usersAndGroups.sh
+#Description: Contains the menu which accesses the different parts of the script.
+
+source ./Permissions.sh
 source ./RepoMangr.sh
 
 exit=0
@@ -62,39 +63,6 @@ projectMenu()
 	cd ..
 }
 
-echo "Welcome to myCVS software, a CVS solution."
-
-#Main program loop.
-while [[ exit -ne 1 ]]; do
-	echo "Please select a task with relevant number." 
-	echo "1) Open Repository"
-	echo "2) Create Repository"
-	echo "3) Delete Repository"
-	echo "4) Archive Repository"
-	echo "5) Peek at files in Repository"
-	echo "0) Exit Program"
-
-	#Handles user input.
-	option=999
-	read option
-	if [[ option -eq 0 ]]; then
-		exit=1
-	elif [[ option -eq 1 ]]; then
-		openDir 1
-	elif [[ option -eq 2 ]]; then
-		createDir 1
-	elif [[ option -eq 3 ]]; then
-		deleteDir 1
-	elif [[ option -eq 4 ]]; then
-		Archive
-	elif [[ option -eq 5 ]]; then
-		ListFiles
-	else
-		echo "Invalid value. Try again."
-		echo ""
-	fi
-done
-
 dirMenu()
 {
 	exitMenu=0
@@ -128,3 +96,35 @@ dirMenu()
 	cd ..
 }
 
+echo "Welcome to myCVS software, a CVS solution."
+
+#Main program loop.
+while [[ exit -ne 1 ]]; do
+	echo "Please select a task with relevant number." 
+	echo "1) Open Repository"
+	echo "2) Create Repository"
+	echo "3) Delete Repository"
+	echo "4) Archive Repository"
+	echo "5) Peek at files in Repository"
+	echo "0) Exit Program"
+
+	#Handles user input.
+	option=999
+	read option
+	if [[ option -eq 0 ]]; then
+		exit=1
+	elif [[ option -eq 1 ]]; then
+		openDir 1
+	elif [[ option -eq 2 ]]; then
+		createDir 1
+	elif [[ option -eq 3 ]]; then
+		deleteDir 1
+	elif [[ option -eq 4 ]]; then
+		Archive
+	elif [[ option -eq 5 ]]; then
+		ListFiles
+	else
+		echo "Invalid value. Try again."
+		echo ""
+	fi
+done
