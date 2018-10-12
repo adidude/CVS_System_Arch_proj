@@ -1,6 +1,6 @@
 #Authors: Aditya Kumar Menon,	Mandar Tamhane,		Rauf Nawaz Tarar
 #MatricNo.: 170025886			170021792			170012145
-source ./Repository1
+source ./Repository1.sh
 source ./usersAndGroups.sh
 
 exit=0
@@ -22,7 +22,7 @@ else
 	echo ""
 fi
 
-currentDir=null
+currentRepo=null
 
 #Command to open a directory. $1 determines if the current directory is a repo.
 openDir()
@@ -43,6 +43,10 @@ openDir()
 				if test -d $dir; then
 					#Open directory and display contents as well as current directory location.
 					cd $dir
+					#If The directory is a repo it will be stored in the currentRepo variable.
+					if [[ $1 -eq 1 ]]; then
+						currentRepo=$dir
+					fi
 					pwd
 					echo ""
 					selectDir=1
