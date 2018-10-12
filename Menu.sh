@@ -1,3 +1,5 @@
+source ./Repository1.sh
+source ./usersAndGroups.sh
 exit=0
 
 #Will open and/or create the directory containing the repositories being worked with.
@@ -8,17 +10,7 @@ else
 	cd ~/CVS
 fi
 
-#Will create the directory containing the older versions of projects if History does not exist.
-if test -d ./.History; then
-	echo ""
-else
-	mkdir .History
-	echo ""
-fi
-
-currentDir=null
-
-#Command to open a directory. $1 determines if the current directory is a repo.
+#Command to open a repo.
 openDir()
 {
 	#Loops as long as a directory has not been selected or exits if there are no directories to open.
@@ -37,14 +29,11 @@ openDir()
 				if test -d $dir; then
 					#Open directory and display contents as well as current directory location.
 					cd $dir
-					#If the directory is a repo the currentRepo var changes.
-					if [[ $1 -eq 1 ]]; then
-						currentRepo=$dir
-					fi
 					pwd
 					echo ""
 					selectDir=1
 					projectMenu
+					
 				else
 					echo "Directory not found. Try again."
 					echo ""
@@ -57,7 +46,7 @@ openDir()
 		done
 }
 
-#Will create a directory. $1 Is the variable to determine if the repo's history files get created.
+#Will create a repo.
 createDir()
 {
 	createdDir=0
@@ -71,17 +60,14 @@ createDir()
 			echo ""
 		else
 			mkdir $reponame
-			#If directory is a repo following makes a directory to track the history of the repo. 
-			if [[ $1 -eq 1 ]]; then
-				mkdir ~/CVS/.History/$reponame
-			fi
 			createdDir=1
 			echo ""
 		fi
-	done		
+	done	
+	createGroup
 }
 
-#Deletes a directory. $1 is the variable to determine if the repo's history files get deleted. 
+#Deletes a repo.
 deleteDir()
 {
 	deletedir=0
@@ -91,28 +77,15 @@ deleteDir()
 		if [[ "$(ls -d *)" ]]; then
 			echo "Directory list:"
 			ls -d *
+			dir=null
 			echo "Type the name of the directory to delete."
 			read dir
 			#Tests if directory exists.
 			if test -d $dir; then
-				echo "Are you sure you want to delete the directory and all of its files(This is irreversible) [y/n]"
-				read del
-
-				#Ensures the user wishes to delete the repository.
-				if [[ del = "y" ]]; then
-					#Deletes the directory along with the files and sub directories within it.
-					rm -Rf $dir
-					#If directory is a repo following deletes history of repo. 
-					if [[ $2 -eq 1 ]]; then
-						rm -Rf ~/CVS/.History/$dir
-					fi
-					deletedir=1
-					echo "Successfully deleted repository."
-					echo ""
-				else
-					deletedir=1
-					echo "Deleting cancelled."
-				fi
+				rm -Rf $dir
+				deletedir=1
+				echo "Successfully deleted repository."
+				echo ""
 			else
 				echo "Directory not found. Try again." 
 			fi
@@ -139,76 +112,14 @@ createFile()
 			echo "File already exists."
 			echo ""
 		else
-			#Create file and exit loop.
+			#Create file
 			touch $file
 			fileCreated=1
 		fi
 	done
 }
 
-#Will commit changes.
-commit()
-{
-	#Adds information of commit to log file.
-	echo "Task:	Commit Files." >> log
-	echo "User:	$USER" >> log
-	echo "Time:	$(date)" >> log
-	echo "Repo:	$(pwd)" >> log
-
-	#if repository is empty print error otherwise continue with commiting files.
-	if [[ $(ls) ]]; then
-		#Opens the .History directory to make a directory with the time/date within the relevant repo.
-		cd ~/CVS/.History/$currentRepo
-		#Stores the date/time in a variable, then makes a directory with the date/time as its name.
-		time=$(date +%Y%m%d%H%M%S)
-		mkdir "$time"
-
-		#Return to the current working directory.
-		cd ~/CVS/$currentRepo
-		#Copy Repo to current version folder.
-		cp -r -f -t ~/CVS/.History/$currentRepo/$time $(pwd)
-
-		echo "Commit Summary:" >> log
-		echo "" >> log
-
-		latestDir=0
-		secondLatestDir=0
-		#read each entry and compare it to the largest value.
-		for entry in ~/CVS/.History/$currentRepo
-		do
-			#If the entry is greater than the newest directory.
-			if [[ $entry -gt latestDir ]]; then
-				secondLatestDir=$latestDir
-				latestDir=$entry
-			fi
-		done
-
-		#If there exists a folder for the second latest directory.
-		if [[ -d ~/CVS/.History/$currentRepo/$secondLatestDir ]]; then
-			#For each entry in the second latest directory in the history directory for the current repo.
-			for entry in ~/CVS/.History/$currentRepo/$secondLatestDir
-			do
-				#If that entry exists in the newly committed directory.
-				if [[ -e ~/CVS/.History/$currentRepo/$latestDir/$entry ]]; then
-					#Append changes between files to the log file.
-					echo "Changes to $entry :" >> log
-					diff $entry ~/CVS/.History/$currentRepo/$latestDir/$entry >> log
-				else
-					echo "File $entry has been deleted." >> log
-				fi			
-			done
-		else
-			#For each entry append the files added to log.
-			for entry in ~/CVS/.History/$currentRepo/$latestDir
-			do
-				echo "Added $entry" >> log
-			done
-		fi
-	else
-		echo "Unable to commit files due to empty repository."
-	fi
-}
-
+#REQUIRES LOG IMPLEMENTATION
 #Will open a text file in sublime text.
 openFile()
 {
@@ -237,47 +148,21 @@ openFile()
 	done
 }
 
-#Will append information to a log file when a text file is opened. $1 is the file name.
+#Will append information to a log file when a text file is opened.
 logFileEdit()
 {
-	echo "Task:			Open text file for possible edits." >> log
-	echo "User:			$USER" >> log
-	echo "Time:			$(date)" >> log
-	echo "File:			$1" >> log
-	echo "Directory:	$(pwd)" >> log
+	echo "Task:			Open text file for possible edits." >> log.txt
+	echo "User:			$USER" >> log.txt
+	echo "Time:			$(date)" >> log.txt
+	echo "File:			$1" >> log.txt
+	echo "Directory:	$(pwd)" >> log.txt
 }
 
-#Will allow user to return to an older version of the current repo.
-rollBack()
-{
-	loopExit=0
-	#While the repo has not been rolled back.
-	while [[ loopExit -eq 0 ]]; do
-		#If there are pre existing versions of the current repo.
-		if [[ $(ls ~/CVS/.History/$currentRepo) ]]; then
-			echo "Past versions of $currentRepo (YYYYMMDDHHmmSS):"
-			ls ~/CVS/.History/$currentRepo
-			echo "Enter the name of the version you would like to return to."
-			read ver
-			#If the directory specified by the user exists
-			if [[ -d ~/CVS/.History/$currentRepo/$ver ]]; then
-				#Delete contents of currentRepo.
-				rm -Rf ~/CVS/$currentRepo/*
-				#Copy files from History to current repo.
-				cp -r -f -t ~/CVS/$currentRepo ~/CVS/.History/$currentRepo/$ver
+#Will commit files
+#commit()
+#{
 
-				echo "Roll back Successfully executed."
-				loopExit=1
-			else
-				echo "Directory does not exist. Try again. "
-			fi
-		else
-			#Exits loop due to inability to roll back.
-			echo "No older versions to return to."
-			loopExit=1
-		fi
-	done
-}
+#}
 
 #INCOMPLETE
 #Menu for once a project has been opened.
@@ -288,8 +173,10 @@ projectMenu()
 		echo "Please select a task with relevant number." 
 		echo "1) Create file"
 		echo "2) Open text file"
-		echo "3) Commit changes"
-		echo "4) Open directory"
+		echo "3) Commit file"
+		echo "4) Commit all changes"
+		echo "5) Open directory"
+		echo "6) Mange Permissions"
 		echo "0) Exit repository"
 
 		#Handles user input.
@@ -301,10 +188,12 @@ projectMenu()
 			createFile
 		elif [[ option -eq 2 ]]; then
 			openFile
-		elif [[ option -eq 3 ]]; then
-			commit
-		elif [[ option -eq 4 ]]; then
+		#elif [[ option -eq 3 ]]; then
+			
+		elif [[ option -eq 5 ]]; then
 			openDir
+		elif [[ option -eq 6 ]]; then
+			dirMenu
 		else
 			echo "Invalid value. Try again."
 			echo ""
@@ -336,10 +225,44 @@ while [[ exit -ne 1 ]]; do
 		createDir
 	elif [[ option -eq 3 ]]; then
 		deleteDir
-	#elif [[ option -eq 4 ]]; then
-		#statements
+	elif [[ option -eq 4 ]]; then
+		Archive
 	else
 		echo "Invalid value. Try again."
 		echo ""
 	fi
 done
+
+dirMenu()
+{
+	exitMenu=0
+	while [[ exitMenu -eq 0 ]]; do
+		echo "Please select a task with relevant number." 
+		echo "The Current group is" stat -c "%G" $pwd
+		echo "1) View Owner"
+		echo "2) View Members"
+		echo "3) Add Members to Group"
+		echo "4) Share Repository"
+		echo "0) Exit Menu"
+
+		#Handles user input.
+		option=999
+		read option
+		if [[ option -eq 0 ]]; then
+			exitMenu=1
+		elif [[ option -eq 1 ]]; then
+			viewOwner
+		elif [[ option -eq 2 ]]; then
+			viewMembers
+		elif [[ option -eq 3 ]]; then
+			addToGroup
+		elif [[ option -eq 4 ]]; then
+			shareFile "$pwd"
+		else
+			echo "Invalid value. Try again."
+			echo ""
+		fi
+	done
+	cd ..
+}
+
